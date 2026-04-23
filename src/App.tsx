@@ -3,9 +3,9 @@ import '@fortawesome/fontawesome-free/css/all.css';
 import {
   Link,
   Navigate,
-  NavLink,
   Route,
   Routes,
+  useLocation,
   useParams,
 } from 'react-router-dom';
 import './App.scss';
@@ -23,14 +23,19 @@ const ActiveNavLink = ({
 }: {
   to: string;
   children: React.ReactNode;
-}) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) => `navbar-item${isActive ? ' is-active' : ''}`}
-  >
-    {children}
-  </NavLink>
-);
+}) => {
+  const location = useLocation();
+  const isActive =
+    to === '/'
+      ? location.pathname === '/'
+      : location.pathname === to || location.pathname.startsWith(`${to}/`);
+
+  return (
+    <Link className={`navbar-item${isActive ? ' is-active' : ''}`} to={to}>
+      {children}
+    </Link>
+  );
+};
 
 const HomePage = () => (
   <>
@@ -43,6 +48,10 @@ const TabsPage = () => {
   const { tabId } = useParams<{ tabId?: string }>();
   const activeTab = tabs.find(tab => tab.id === tabId);
 
+  // NOTE: the requirement calls for using the official React Tabs library
+  // (for example, react-tabs or react-tabs-js). This current implementation
+  // is a custom Bulma tab markup and does not use the requested library
+  // components such as <Tabs>, <TabList>, <Tab>, and <TabPanel>.
   return (
     <>
       <h1 className="title">Tabs page</h1>
@@ -95,7 +104,7 @@ export const App = () => (
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<Navigate to="/" replace />} />
-          <Route path="/tabs" element={<TabsPage />}>
+          <Route path="/tabs">
             <Route index element={<TabsPage />} />
             <Route path=":tabId" element={<TabsPage />} />
           </Route>
