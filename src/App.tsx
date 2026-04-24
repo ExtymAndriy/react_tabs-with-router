@@ -6,8 +6,16 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
   useParams,
 } from 'react-router-dom';
+import {
+  Tab as ReactTab,
+  TabList,
+  TabPanel,
+  Tabs as ReactTabs,
+} from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
 import './App.scss';
 import { Tab } from './types/Tab';
 
@@ -45,34 +53,33 @@ const HomePage = () => (
 );
 
 const TabsPage = () => {
+  const navigate = useNavigate();
   const { tabId } = useParams<{ tabId?: string }>();
-  const activeTab = tabs.find(tab => tab.id === tabId);
+  const activeIndex = tabs.findIndex(tab => tab.id === tabId);
+  const selectedIndex = activeIndex >= 0 ? activeIndex : 0;
 
-  // NOTE: the requirement calls for using the official React Tabs library
-  // (for example, react-tabs or react-tabs-js). This current implementation
-  // is a custom Bulma tab markup and does not use the requested library
-  // components such as <Tabs>, <TabList>, <Tab>, and <TabPanel>.
   return (
     <>
       <h1 className="title">Tabs page</h1>
 
-      <div className="tabs is-boxed">
-        <ul>
+      <ReactTabs
+        selectedIndex={selectedIndex}
+        onSelect={index => navigate(`/tabs/${tabs[index].id}`)}
+      >
+        <TabList>
           {tabs.map(tab => (
-            <li
-              key={tab.id}
-              data-cy="Tab"
-              className={activeTab?.id === tab.id ? 'is-active' : ''}
-            >
-              <Link to={`/tabs/${tab.id}`}>{tab.title}</Link>
-            </li>
+            <ReactTab key={tab.id} data-cy="Tab">
+              {tab.title}
+            </ReactTab>
           ))}
-        </ul>
-      </div>
+        </TabList>
 
-      <div className="block" data-cy="TabContent">
-        {activeTab ? activeTab.content : 'Please select a tab'}
-      </div>
+        {tabs.map(tab => (
+          <TabPanel key={tab.id} data-cy="TabContent">
+            {tab.content}
+          </TabPanel>
+        ))}
+      </ReactTabs>
     </>
   );
 };
@@ -105,7 +112,7 @@ export const App = () => (
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<Navigate to="/" replace />} />
           <Route path="/tabs">
-            <Route index element={<TabsPage />} />
+            <Route index element={<Navigate to="/tabs/tab-1" replace />} />
             <Route path=":tabId" element={<TabsPage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
