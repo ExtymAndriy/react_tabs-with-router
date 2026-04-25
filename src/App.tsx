@@ -6,16 +6,8 @@ import {
   Route,
   Routes,
   useLocation,
-  useNavigate,
   useParams,
 } from 'react-router-dom';
-import {
-  Tab as ReactTab,
-  TabList,
-  TabPanel,
-  Tabs as ReactTabs,
-} from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
 import './App.scss';
 import { Tab } from './types/Tab';
 
@@ -53,41 +45,31 @@ const HomePage = () => (
 );
 
 const TabsPage = () => {
-  const navigate = useNavigate();
   const { tabId } = useParams<{ tabId?: string }>();
   const activeIndex = tabs.findIndex(tab => tab.id === tabId);
-
-  if (activeIndex === -1) {
-    return (
-      <>
-        <h1 className="title">Tabs page</h1>
-        <p className="notification is-warning">Please select a tab</p>
-      </>
-    );
-  }
+  const selectedTab = tabs[activeIndex];
 
   return (
     <>
       <h1 className="title">Tabs page</h1>
 
-      <ReactTabs
-        selectedIndex={activeIndex}
-        onSelect={index => navigate(`/tabs/${tabs[index].id}`)}
-      >
-        <TabList>
-          {tabs.map(tab => (
-            <ReactTab key={tab.id} data-cy="Tab">
-              {tab.title}
-            </ReactTab>
+      <div className="tabs is-boxed">
+        <ul>
+          {tabs.map((tab, index) => (
+            <li
+              key={tab.id}
+              className={activeIndex === index ? 'is-active' : ''}
+              data-cy="Tab"
+            >
+              <Link to={`/tabs/${tab.id}`}>{tab.title}</Link>
+            </li>
           ))}
-        </TabList>
+        </ul>
+      </div>
 
-        {tabs.map(tab => (
-          <TabPanel key={tab.id} data-cy="TabContent">
-            {tab.content}
-          </TabPanel>
-        ))}
-      </ReactTabs>
+      <div data-cy="TabContent">
+        {selectedTab ? selectedTab.content : 'Please select a tab'}
+      </div>
     </>
   );
 };
