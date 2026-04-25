@@ -56,14 +56,22 @@ const TabsPage = () => {
   const navigate = useNavigate();
   const { tabId } = useParams<{ tabId?: string }>();
   const activeIndex = tabs.findIndex(tab => tab.id === tabId);
-  const selectedIndex = activeIndex >= 0 ? activeIndex : 0;
+
+  if (activeIndex === -1) {
+    return (
+      <>
+        <h1 className="title">Tabs page</h1>
+        <p className="notification is-warning">Please select a tab</p>
+      </>
+    );
+  }
 
   return (
     <>
       <h1 className="title">Tabs page</h1>
 
       <ReactTabs
-        selectedIndex={selectedIndex}
+        selectedIndex={activeIndex}
         onSelect={index => navigate(`/tabs/${tabs[index].id}`)}
       >
         <TabList>
@@ -112,7 +120,7 @@ export const App = () => (
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<Navigate to="/" replace />} />
           <Route path="/tabs">
-            <Route index element={<Navigate to="/tabs/tab-1" replace />} />
+            <Route index element={<TabsPage />} />
             <Route path=":tabId" element={<TabsPage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
